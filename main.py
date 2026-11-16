@@ -1,7 +1,8 @@
 import pygame
 from game.game_engine import GameEngine
 
-# Initialize pygame/Start application
+# Configure audio before initializing Pygame; SoundManager handles mixer failures.
+pygame.mixer.pre_init(22050, -16, 1, 512)
 pygame.init()
 
 # Screen dimensions
@@ -19,6 +20,7 @@ FPS = 60
 # Game loop
 engine = GameEngine(WIDTH, HEIGHT)
 
+
 def main():
     running = True
     while running:
@@ -26,16 +28,21 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            engine.handle_event(event)
+            else:
+                engine.handle_event(event)
 
-        engine.handle_input()
-        engine.update()
-        engine.render(SCREEN)
+        if engine.quit_requested:
+            running = False
 
-        pygame.display.flip()
-        clock.tick(FPS)
+        if running:
+            engine.handle_input()
+            engine.update()
+            engine.render(SCREEN)
+            pygame.display.flip()
+            clock.tick(FPS)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()

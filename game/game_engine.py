@@ -1,6 +1,7 @@
 import pygame
 import random
 from .target import Target
+from .sound_manager import SoundManager
 
 # Game Engine
 
@@ -33,6 +34,7 @@ class GameEngine:
         self.menu_option_font = pygame.font.SysFont("Arial", 30, bold=True)
         self.menu_help_font = pygame.font.SysFont("Arial", 20)
 
+        self.sound = SoundManager()
         self.difficulty = "Medium"
         self.menu_active = False
         self.game_over = False
@@ -62,6 +64,7 @@ class GameEngine:
         self.time_left_frames = self.round_seconds * 60
         self.game_over = False
         self.menu_active = False
+        self.sound.stop_all()
         self.target = self._spawn_target()
 
     def handle_event(self, event):
@@ -127,9 +130,11 @@ class GameEngine:
         if self.target.contains_point(x, y):
             self.hits += 1
             self.score += 1
+            self.sound.play("hit")
             self.target = self._spawn_target()
         else:
             self.misses += 1
+            self.sound.play("click_miss")
 
     def handle_input(self):
         # Reserved for continuously-held-key input; this game is mouse-driven.
@@ -143,11 +148,13 @@ class GameEngine:
         if self.time_left_frames <= 0:
             self.time_left_frames = 0
             self.game_over = True
+            self.sound.play("game_over")
             return
 
         self.target.update()
         if self.target.expired():
             self.misses += 1
+            self.sound.play("timeout_miss")
             self.target = self._spawn_target()
 
     def accuracy(self):
