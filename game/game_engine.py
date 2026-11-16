@@ -23,6 +23,9 @@ class GameEngine:
         self.misses = 0
         self.score = 0
         self.font = pygame.font.SysFont("Arial", 26)
+        self.game_over_font = pygame.font.SysFont("Arial", 48, bold=True)
+        self.game_over_detail_font = pygame.font.SysFont("Arial", 28)
+        self.game_over_message_font = pygame.font.SysFont("Arial", 22)
         self.game_over = False
 
     def _spawn_target(self):
@@ -71,6 +74,24 @@ class GameEngine:
         return round(100 * self.hits / total, 1)
 
     def render(self, screen):
+        if self.game_over:
+            title = self.game_over_font.render("GAME OVER", True, WHITE)
+            score = self.game_over_detail_font.render(
+                f"Final Score: {self.score}", True, WHITE
+            )
+            accuracy = self.game_over_detail_font.render(
+                f"Final Accuracy: {self.accuracy()}%", True, WHITE
+            )
+            message = self.game_over_message_font.render(
+                "Close the window to exit.", True, WHITE
+            )
+
+            screen.blit(title, title.get_rect(center=(self.width // 2, self.height // 2 - 90)))
+            screen.blit(score, score.get_rect(center=(self.width // 2, self.height // 2 - 20)))
+            screen.blit(accuracy, accuracy.get_rect(center=(self.width // 2, self.height // 2 + 25)))
+            screen.blit(message, message.get_rect(center=(self.width // 2, self.height // 2 + 95)))
+            return
+
         r = int(self.target.visual_radius())
         pygame.draw.circle(screen, RED, (self.target.x, self.target.y), r)
         pygame.draw.circle(screen, WHITE, (self.target.x, self.target.y), r, 2)
@@ -84,8 +105,3 @@ class GameEngine:
 
         acc_text = self.font.render(f"Accuracy: {self.accuracy()}%", True, WHITE)
         screen.blit(acc_text, (self.width // 2 - 90, 10))
-
-        if self.game_over and not getattr(self, "_game_over_logged", False):
-            # NOTE: no proper game-over screen yet - see Task 2 in the README.
-            print(f"Time's up! Final score: {self.score}  Accuracy: {self.accuracy()}%")
-            self._game_over_logged = True
